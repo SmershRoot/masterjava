@@ -1,7 +1,9 @@
 package ru.javaops.masterjava.matrix;
 
 import java.util.Random;
+import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -14,6 +16,42 @@ public class MatrixUtil {
     public static int[][] concurrentMultiply(int[][] matrixA, int[][] matrixB, ExecutorService executor) throws InterruptedException, ExecutionException {
         final int matrixSize = matrixA.length;
         final int[][] matrixC = new int[matrixSize][matrixSize];
+
+        class ColumnsMatrixC{
+            final int col_i;
+            final int[] row;
+
+            private ColumnsMatrixC(int col_i, int[] row) {
+                this.col_i = col_i;
+                this.row = row;
+            }
+        }
+
+        final CompletionService<ColumnsMatrixC> completionService = new ExecutorCompletionService(executor);
+
+        for (int i = 0; i < matrixSize; i++) {
+            final int col_i = i;
+
+            completionService.submit(() -> {
+                final int[] columnC = new int[matrixSize];
+
+                for (int j = 0; j < matrixSize; j++) {
+                    int sum = 0;
+                    for (int k = 0; k < matrixSize; k++) {
+                        sum += matrixA[col_i][k] * matrixB[k][j];
+                    }
+                    columnC[j] = sum;
+                }
+                return new ColumnsMatrixC(col_i, columnC);
+            });
+        }
+
+        for (int j = 0; j < matrixSize; j++){
+                ColumnsMatrixC columnsMatrixC = completionService.take().get();
+                for (int l = 0; l < matrixSize; l++){
+                    matrixC[l][columnsMatrixC.col_i] = columnsMatrixC.row[l];
+                }
+            }
 
         return matrixC;
     }
