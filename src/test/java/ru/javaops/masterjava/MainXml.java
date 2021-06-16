@@ -23,10 +23,10 @@ import static j2html.TagCreator.*;
 public class MainXml {
 
     public static void main(String[] args) throws Exception {
-        /*if (args.length != 1) {
+        if (args.length != 1) {
             System.out.println("Format: projectName");
             System.exit(1);
-        }*/
+        }
         String projectName = "topjava";
         URL payloadUrl = Resources.getResource("payload.xml");
 
