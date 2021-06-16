@@ -33,7 +33,7 @@ public class MainXml {
             System.out.println("Required argument: projectName");
             System.exit(1);
         }
-        String projectName = "topjava";
+        String projectName = args[0];
         URL payloadUrl = Resources.getResource("payload.xml");
 
         Set<User> users = parseByJaxb(projectName, payloadUrl);
